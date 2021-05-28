@@ -5,12 +5,12 @@ import requests
 import re
 
 
-def get_song(name: str) -> Optional[Dict]:
-    lyrics = get_song_lyricsapi(name)
+def get_song(song_name: str) -> Optional[Dict]:
+    lyrics = get_song_lyricsapi(song_name)
     if lyrics is not None:
         return lyrics
 
-    lyrics = get_song_geniusapi(name)
+    lyrics = get_song_geniusapi(song_name)
     if lyrics is not None:
         return lyrics
 
@@ -83,5 +83,3 @@ def format_song_name(string: str) -> str:
     if len(string) > 0:
         return string.replace(" ", "%20")
     return None
-
-get_song_geniusapi('Never Gonna Give You Up')
