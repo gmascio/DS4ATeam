@@ -4,17 +4,29 @@ from unittest.mock import MagicMock
 from lyrics_api import get_song, get_song_lyricsapi, format_song_name, get_song_geniusapi
 import requests_mock
 
-from sentimentalyzer import remove_words_in_brackets, lyric_sentimentalyzer
+from sentimentalyzer import remove_words_in_brackets, lyric_sentimentalyzer, sentimentalyzer, word_sentiment
 
 
 def test_sentimentalyzer():
-    return None
+    assert type(sentimentalyzer('yessir')) == float
+    assert sentimentalyzer('yessir') == 0.0
+    assert sentimentalyzer('Love') == 0.6369
+    assert sentimentalyzer('Hate') == -0.5719
 
 
 def test_lyric_sentimentalyzer():
     lyrics = "[Intro] Oooooh we're halfway there. Ooooh Living on a prayer. [interlude] Living on a prayer"
-    assert lyric_sentimentalyzer(lyrics) == int
-    return None
+    response = lyric_sentimentalyzer(lyrics)
+    assert type(response['entire_thing']) == float
+    assert len(response['words']) > 0
+    assert type(response['words']) == list
+
+def test_word_sentiment():
+    lyrics = "Oooooh we're halfway there. love Living on a prayer. Living on a prayer"
+    response = word_sentiment(lyrics)
+    assert type(response) == list
+    assert len(response) == 13
+    assert response[4] == 'love: 0.6369'
 
 
 def test_remove_words_in_brackets():
