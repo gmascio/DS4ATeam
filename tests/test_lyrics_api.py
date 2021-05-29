@@ -23,7 +23,8 @@ def test_get_song_geniusapi():
     assert response['song_name'] == 'Never Gonna Give You Up'
     assert len(response['lyrics']) > 0
 
-#def test_get_song():
-#    assert get_song('') is None
-#    assert get_song('NeverGonnaGiveYouUp')['song_name'] == 'NeverGonnaGiveYouUp'
-#    assert len(get_song('NeverGonnaGiveYouUp')['lyrics']) > 0
+def test_get_song():
+    assert get_song('') is None
+    response = get_song('Never Gonna Give You Up')
+    assert response['song_name'] == 'Never Gonna Give You Up'
+    assert len(response['lyrics']) > 0
