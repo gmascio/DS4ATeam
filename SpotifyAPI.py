@@ -4,11 +4,25 @@ import pandas as pd
 import requests
 import base64
 
+from requests.models import encode_multipart_formdata
+
 class SpotifyAPI:
     def __init__(self, clientid, clientsec):
         self.clientid = clientid
         self.clientsec = clientsec
         self.getToken()
+
+    def __checkExpired(self):
+        elapsed = time.time() - self.last_renewed
+        print(elapsed, self.expires_in)
+        if  elapsed > (self.expires_in - 100):
+            print(f"Token expired after {elapsed} Attempting to renew.")
+            self.getToken()
+
+    def __isRateLimited(self, r):
+        retry_after = int(r.headers["Retry-After"])
+        print(f"Rate limited. Set to sleep for {retry_after}")
+        time.sleep(retry_after)
 
     def getToken(self):
         creds = f"{self.clientid}:{self.clientsec}"
@@ -29,18 +43,12 @@ class SpotifyAPI:
             endpoint = endpoint + f'{key}={val}&'
         endpoint = endpoint[:-1]
 
-        elapsed = time.time() - self.last_renewed
-        print(elapsed, self.expires_in)
-        if  elapsed > (self.expires_in - 100):
-            print(f"Token expired after {elapsed} Attempting to renew.")
-            self.getToken()
+        self.__checkExpired()
 
         r = requests.get(endpoint, headers=self.headers)
 
         while(r.status_code == 429):
-            retry_after = int(r.headers["Retry-After"])
-            print(f"Rate limited. Set to sleep for {retry_after}")
-            time.sleep(retry_after)
+            self.__isRateLimited(r)
             r = requests.get(endpoint, headers=self.headers)
 
         if r.status_code != 200:
@@ -63,12 +71,43 @@ class SpotifyAPI:
             spotify_name = 'null'
 
         return spotify_id, spotify_href, spotify_name
+
+    def trackSeveral(self, ids, lst):
+        endpoint = "https://api.spotify.com/v1/tracks?ids="
+        ids = ','.join(ids)
+        endpoint += ids
+
+        self.__checkExpired()
+
+        r = requests.get(endpoint, headers=self.headers)
         
+        while(r.status_code == 429):
+            self.__isRateLimited(r)
+            r = requests.get(endpoint, headers=self.headers)
 
-if __name__ == "__main__":
+        r = r.json()
+
+        spotify_ids = [d['id'] for d in r['tracks']]
+        spotify_names = [d['name'] for d in r['tracks']]
+        popularities = [d['popularity'] for d in r['tracks']]
+
+        for track in r['tracks']:
+            lst.append({'spotify_id': track['id'], 'spotify_name': track['name'], 'spotify_popularity': track['popularity']})
+    
+    def audiofeatSeveral(self, ids, lst):
+        endpoint = "https://api.spotify.com/v1/audio-features?ids="
+        ids = ','.join(ids)
+        endpoint += ids
+
+        r = requests.get(endpoint, headers=self.headers)
+        r = r.json()
+        for i in r["audio_features"]:
+            lst.append({'id': i['id'], 'danceability': i['danceability']})
+    
+
+
+def __getTrackData(handler):
     df = pd.read_csv("UMG_Raw_Song_Data.csv")
-
-    handler = SpotifyAPI("831cc784a86e40f7a94913a7760911c1", "9ec69ad406ef4de69d0c52b0becf9eb8")
 
     isrc = df['isrc'].values
     names = df['song_name'].values
@@ -80,5 +119,29 @@ if __name__ == "__main__":
     
     df_spotify = pd.DataFrame(new_values)
     df_spotify.to_csv('Spotify_Data.csv', index=False)
+
+def __getAudioFeatures(handler):
+    lst = []
+    handler.audiofeatSeveral(['4JpKVNYnVcJ8tuMKjAj50A','2NRANZE9UCmPAS5XVbXL40'], lst)
+    handler.audiofeatSeveral(['24JygzOLM0EmRQeGtFcIcG'], lst)
+    print(lst)
+
+def main(handler):
+    df = pd.read_csv("Spotify_Data_NONULL.csv")
+    spotify_id = df['spotify_id'].values
+    spotify_id = [spotify_id[i:i+50] for i in range(0, len(spotify_id), 50)]
+
+    lst = []
+    start = time.time()
+    for sublist in spotify_id:
+        handler.trackSeveral(sublist, lst)
+    print(f"Runtime: {time.time() - start}")
+
+    df_spotify = pd.DataFrame(lst)
+    df_spotify.to_csv('Spotify_Popularity.csv', index=False)
+
+if __name__ == "__main__":
+    handler = SpotifyAPI("831cc784a86e40f7a94913a7760911c1", "9ec69ad406ef4de69d0c52b0becf9eb8")
+    main(handler)
 
     
