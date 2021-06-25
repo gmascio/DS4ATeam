@@ -99,10 +99,30 @@ class SpotifyAPI:
         ids = ','.join(ids)
         endpoint += ids
 
+        self.__checkExpired()
+
         r = requests.get(endpoint, headers=self.headers)
+
+        while(r.status_code == 429):
+            self.__isRateLimited(r)
+            r = requests.get(endpoint, headers=self.headers)
+
+        toPop = ['type', 'uri', 'track_href', 'analysis_url', 'time_signature']
+
         r = r.json()
-        for i in r["audio_features"]:
-            lst.append({'id': i['id'], 'danceability': i['danceability']})
+
+        for track in r['audio_features']:
+            skip = False
+            for i in toPop:
+                try:
+                    track.pop(i)
+                except:
+                    skip = True
+                    break
+
+            if skip: continue
+
+            lst.append(track)
     
 
 
@@ -120,13 +140,19 @@ def __getTrackData(handler):
     df_spotify = pd.DataFrame(new_values)
     df_spotify.to_csv('Spotify_Data.csv', index=False)
 
-def __getAudioFeatures(handler):
-    lst = []
-    handler.audiofeatSeveral(['4JpKVNYnVcJ8tuMKjAj50A','2NRANZE9UCmPAS5XVbXL40'], lst)
-    handler.audiofeatSeveral(['24JygzOLM0EmRQeGtFcIcG'], lst)
-    print(lst)
-
 def main(handler):
+    df = pd.read_csv("Spotify_Data_NONULL.csv")
+    spotify_id = df['spotify_id'].values
+    spotify_id = [spotify_id[i:i+50] for i in range(0, len(spotify_id), 50)]
+
+    lst = []
+    for sublist in spotify_id:
+        handler.audiofeatSeveral(sublist, lst)
+
+    df_spotify = pd.DataFrame(lst)
+    df_spotify.to_csv('Spotify_AudioFeatures.csv', index=False)
+
+def __getPopularity(handler):
     df = pd.read_csv("Spotify_Data_NONULL.csv")
     spotify_id = df['spotify_id'].values
     spotify_id = [spotify_id[i:i+50] for i in range(0, len(spotify_id), 50)]
