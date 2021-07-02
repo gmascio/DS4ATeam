@@ -1,7 +1,7 @@
 # UMG Project # 3 - Can Certain Words Promote Virality in Social Media?
 
 ### Team #47:
-*[Ope Amodu](),
+*[Ope Amodu](https://github.com/OpeAmodu),
 [Jackeline Berrios](),
 [Andre Guiraud](),
 [Leideen Escobar-Hernandez](),
