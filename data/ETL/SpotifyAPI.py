@@ -127,7 +127,7 @@ class SpotifyAPI:
 
 
 def __getTrackData(handler):
-    df = pd.read_csv("UMG_Raw_Song_Data.csv")
+    df = pd.read_csv("../UMG_Raw_Song_Data.csv")
 
     isrc = df['isrc'].values
     names = df['song_name'].values
@@ -141,7 +141,7 @@ def __getTrackData(handler):
     df_spotify.to_csv('Spotify_Data.csv', index=False)
 
 def main(handler):
-    df = pd.read_csv("Spotify_Data_NONULL.csv")
+    df = pd.read_csv("../Spotify_Data_NONULL.csv")
     spotify_id = df['spotify_id'].values
     spotify_id = [spotify_id[i:i+50] for i in range(0, len(spotify_id), 50)]
 
@@ -153,7 +153,7 @@ def main(handler):
     df_spotify.to_csv('Spotify_AudioFeatures.csv', index=False)
 
 def __getPopularity(handler):
-    df = pd.read_csv("Spotify_Data_NONULL.csv")
+    df = pd.read_csv("../Spotify_Data_NONULL.csv")
     spotify_id = df['spotify_id'].values
     spotify_id = [spotify_id[i:i+50] for i in range(0, len(spotify_id), 50)]
 

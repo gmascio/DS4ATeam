@@ -1,8 +1,8 @@
 import pandas as pd
 
-spotify_data = pd.read_csv('UMG_DATA.csv')
-popularity = pd.read_csv('Spotify_Popularity.csv')
-audio_features = pd.read_csv('Spotify_AudioFeatures.csv')
+spotify_data = pd.read_csv('../UMG_DATA.csv')
+popularity = pd.read_csv('../Spotify_Popularity.csv')
+audio_features = pd.read_csv('../Spotify_AudioFeatures.csv')
 
 merged_data = spotify_data[['spotify_id', 'label_studio', 'content_provider_name', 'major_label',
                             'original_release_date',
