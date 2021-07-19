@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <title>Hello Friends!</title>
+        <h2>jQuery-AJAX in FLASK. Execute function on button click</h2>  
+
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"> </script>
+        <script type=text/javascript> 
+            $(function() { 
+                $("#mybutton").click(function (event) { 
+                    var hello;
+                    $.getJSON('/function',
+                        function(data) { 
+                            hello = response.val;
+                        }); 
+                            var input = document.getElementById("id1");
+                            input.value = "HELLO";
+                            return false; 
+                        }); 
+                    }); 
+        </script> 
+    </head>
+
+    <body>
+        <input type = "button" id = "mybutton" value = "Click Here" />
+        <br>
+        <input type="text" id="id1" />
+    </body>
+
+</html>
