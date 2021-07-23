@@ -87,15 +87,15 @@ class SpotifyAPI:
     def topFiveTracks(self, query):
         spotify_ids, spotify_hrefs, spotify_names, spotify_artists = self.search(q=query, type="track", limit="5")
 
-        topFive = {}
+        topFive = []
 
         for i in range(len(spotify_ids)):
-            topFive[i] = {
+            topFive.append({
                     'spotify_id': spotify_ids[i], 
                     'spotify_href': spotify_hrefs[i], 
                     'spotify_name': spotify_names[i],
                     'spotify_artist': ', '.join(spotify_artists[i])
-                    }
+                    })
         
         return topFive
 
