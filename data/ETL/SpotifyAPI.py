@@ -1,5 +1,6 @@
 import json
 import time
+from datetime import datetime
 import pandas as pd
 import requests
 import base64
@@ -64,6 +65,7 @@ class SpotifyAPI:
             spotify_hrefs = [d['href'] for d in r['tracks']['items']]
             spotify_names = [d['name'] for d in r['tracks']['items']]
             artists_temp = [d['artists'] for d in r['tracks']['items']]
+            spotify_ages = [d['album']['release_date'] for d in r['tracks']['items']]
         except:
             print(f"Error getting data for query {endpoint} dumping response.")
             print(json.dumps(r, indent=2))
@@ -71,6 +73,7 @@ class SpotifyAPI:
             spotify_hrefs = 'null'
             spotify_names = 'null'
             artists_temp = 'null'
+            spotify_ages = 'null'
 
         if artists_temp != 'null':
             spotify_artists = []
@@ -82,11 +85,12 @@ class SpotifyAPI:
         else:
             spotify_artists = 'null'
 
-        return spotify_ids, spotify_hrefs, spotify_names, spotify_artists
+        return spotify_ids, spotify_hrefs, spotify_names, spotify_artists, spotify_ages
         
     def topFiveTracks(self, query):
-        spotify_ids, spotify_hrefs, spotify_names, spotify_artists = self.search(q=query, type="track", limit="5")
+        spotify_ids, spotify_hrefs, spotify_names, spotify_artists, spotify_ages = self.search(q=query, type="track", limit="5")
 
+        today = datetime.now()
         topFive = []
 
         for i in range(len(spotify_ids)):
@@ -94,6 +98,7 @@ class SpotifyAPI:
                     'spotify_id': spotify_ids[i], 
                     'spotify_href': spotify_hrefs[i], 
                     'spotify_name': spotify_names[i],
+                    'spotify_age':  (today - datetime.strptime(spotify_ages[i], '%Y-%m-%d')).days,
                     'spotify_artist': ', '.join(spotify_artists[i])
                     })
         
@@ -196,6 +201,6 @@ def __getPopularity(handler):
 
 if __name__ == "__main__":
     handler = SpotifyAPI("831cc784a86e40f7a94913a7760911c1", "9ec69ad406ef4de69d0c52b0becf9eb8")
-    handler.topFiveTracks("can't tell me nothing")
+    print(handler.topFiveTracks("can't tell me nothing"))
 
     
