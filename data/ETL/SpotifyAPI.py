@@ -104,6 +104,26 @@ class SpotifyAPI:
         
         return topFive
 
+    def audiofeatSingle(self, id):
+        endpoint = f"https://api.spotify.com/v1/audio-features/{id}"
+
+        self.__checkExpired()
+
+        r = requests.get(endpoint, headers=self.headers)
+
+        while(r.status_code == 429):
+            self.__isRateLimited(r)
+            r = requests.get(endpoint, headers=self.headers)
+
+        toPop = ['type', 'uri', 'track_href', 'analysis_url', 'time_signature', 'id']
+
+        track = r.json()
+
+        for i in toPop:
+            track.pop(i)
+
+        return track
+
     def trackSeveral(self, ids, lst):
         endpoint = "https://api.spotify.com/v1/tracks?ids="
         ids = ','.join(ids)
@@ -201,6 +221,7 @@ def __getPopularity(handler):
 
 if __name__ == "__main__":
     handler = SpotifyAPI("831cc784a86e40f7a94913a7760911c1", "9ec69ad406ef4de69d0c52b0becf9eb8")
-    print(handler.topFiveTracks("can't tell me nothing"))
+    #print(handler.audiofeatSingle('2MIBAmYwiuGoKUlpq9B9sZ'))
+    #print(handler.topFiveTracks("can't tell me nothing"))
 
     
